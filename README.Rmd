@@ -18,9 +18,11 @@ knitr::opts_chunk$set(
 
 Empfehlungen für das Brettspiel "Risiko", basierend auf statistischen Simulationen.
 
+Faustregeln:
 
 > Beträgt die Summe der Angreiferwürfel 6 oder weniger unbedingt mit 2 Würfeln würfeln!
 
+> Beträgt sie mehr als 10, auf keinen Fall mit beiden würfeln, sondern nur einem.
 
 ## Simulationen
 
@@ -54,7 +56,7 @@ dass wir zwei Armeen verlieren (`defense_looses`), eine Armee verlieren
 
 ## Wahrscheinlichkeit, zweimal zu gewinnen
 
-```{r defense_wins, fig.height=6, fig.width=13}
+```{r defense_wins, fig.height=9, fig.width=13}
 res %>%
    ggplot(aes(attack1, attack2, fill=defense_wins, label=quersumme))+geom_tile() + 
   geom_text()+
@@ -74,7 +76,7 @@ Chance, beides zu gewinnen und sollte.
 
 ## Wahrscheinlichkeit, zweimal zu verlieren
 
-```{r defense_looses, fig.height=6, fig.width=13}
+```{r defense_looses, fig.height=9, fig.width=13}
 res %>%
   ggplot(aes(attack1, attack2, fill=defense_looses, label=quersumme))+geom_tile() + 
   geom_text()+

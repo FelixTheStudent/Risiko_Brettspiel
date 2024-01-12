@@ -9,8 +9,13 @@
 Empfehlungen für das Brettspiel “Risiko”, basierend auf statistischen
 Simulationen.
 
+Faustregeln:
+
 > Beträgt die Summe der Angreiferwürfel 6 oder weniger unbedingt mit 2
 > Würfeln würfeln!
+
+> Beträgt sie mehr als 10, auf keinen Fall mit beiden würfeln, sondern
+> nur einem.
 
 ## Simulationen
 
