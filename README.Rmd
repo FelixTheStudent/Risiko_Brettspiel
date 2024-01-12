@@ -1,0 +1,117 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Risiko_Brettspiel
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+Empfehlungen für das Brettspiel "Risiko", basierend auf statistischen Simulationen.
+
+
+> Beträgt die Summe der Angreiferwürfel 6 oder weniger unbedingt mit 2 Würfeln würfeln!
+
+
+## Simulationen
+
+```{r simulations}
+library(tidyverse)
+
+set.seed(1)
+res <- lapply(1:6, function(die1) { # die ist übrigens Englisch für Würfel.
+  lapply(1:6, function(die2) {
+    attack <- c(die1, die2)
+    defense <- t(replicate(1e4, sample(1:6, 2, replace=TRUE)))
+    defense_wins <- rowSums( t(apply(defense, 1, function(x) sort(x) >= sort(attack))) )
+    c(attack1=die1, attack2=die2, 
+      defense_looses=sum(defense_wins==0)/length(defense_wins),
+      defense_wins=sum(defense_wins==2)/length(defense_wins),
+      both_loose_one=sum(defense_wins==1)/length(defense_wins))    
+  })
+}) %>% 
+  unlist(., recursive = F) %>% bind_rows %>% 
+  mutate(quersumme=attack1+attack2)
+
+head(res)
+```
+
+Wir würfeln 10.000 mal (1e4) mit 2 blauen Verteidigungswürfeln 
+gegen jede mögliche Kombination aus 
+roten Angreiferwürfeln (`attack1/2`), und berechnen dann die Wahrscheinlichkeit
+dass wir zwei Armeen verlieren (`defense_looses`), eine Armee verlieren
+(`both_loose_one`) oder zweimal gewinnen (`defense_wins`).
+
+
+## Wahrscheinlichkeit, zweimal zu gewinnen
+
+```{r defense_wins, fig.height=6, fig.width=13}
+res %>%
+   ggplot(aes(attack1, attack2, fill=defense_wins, label=quersumme))+geom_tile() + 
+  geom_text()+
+  scale_fill_gradient2(name="p",midpoint = 0.5, high="forestgreen", low=scales::muted("firebrick2")) + 
+  theme_classic(25) + 
+  scale_x_continuous(name="Angreiferwürfel 1",breaks=1:6)+ 
+  scale_y_continuous(name="Angreiferwürfel 2", breaks=1:6)+
+  coord_fixed()+
+  labs(caption = "Die Zahlen in jedem Kästchen ist die Angreiferwürfelsumme.") +
+  ggtitle("Risiko  Brettspiel: Mit 2 blauen Würfeln verteidigen?",
+          "p: Wahrscheinlichkeit, dass Angreifer 2 Armeen verliert")
+
+```
+Ist die Summe der beiden Angreiferwürfel sechs oder weniger hat man > 50 %
+Chance, beides zu gewinnen und sollte.
+
+
+## Wahrscheinlichkeit, zweimal zu verlieren
+
+```{r defense_looses, fig.height=6, fig.width=13}
+res %>%
+  ggplot(aes(attack1, attack2, fill=defense_looses, label=quersumme))+geom_tile() + 
+  geom_text()+
+  scale_fill_gradient2(name="p",midpoint = 0.5, high="forestgreen", low=scales::muted("firebrick2")) + 
+  theme_classic(25) + 
+  scale_x_continuous(name="Angreiferwürfel 1",breaks=1:6)+ 
+  scale_y_continuous(name="Angreiferwürfel 2", breaks=1:6)+
+  coord_fixed()+
+  labs(caption = "Die Zahlen in jedem Kästchen ist die Angreiferwürfelsumme.") +
+  ggtitle("Risiko  Brettspiel: Mit 2 blauen Würfeln verteidigen?",
+          "p: Wahrscheinlichkeit, dass Verteidiger 2 Armeen verliert")
+```
+Bei Angreiferwürfelsumme 10 oder höher verliert man meistens beide Armeen --
+auf keinen Fall mit 2 Würfeln.
+
+
+## Wahrscheinlichkeiten
+
+```{r}
+res %>%
+  pivot_longer(defense_looses:both_loose_one) %>%
+  ggplot(aes(quersumme, value, col=name))+geom_jitter(height=0, width=0.1) +
+  scale_x_continuous(breaks=1:12) + theme_bw() +
+  geom_smooth(se=F) + xlab("Summe der beiden Angreiferwürfel") +
+  ylab("Wahrscheinlichkeit") + 
+  ggtitle("Angreiferwürfelsumme als Faustregel verwenden")
+```
+Die Angreiferwürfelsumme ist eine gute Vorhersage für den Erfolg.
+
+
+
+
+
+# Session info
+
+Versionen der verwendeten R Softwarepakete.
+```{r}
+devtools::session_info()
+```
+
